@@ -40,7 +40,11 @@ const Login = () => {
               />
             </svg>
             <input
-              className={error ? "p-2 w-full rounded-lg border border-red-500 placeholder-red-500 mt-1" : "p-2 w-full rounded-lg border mt-1"}
+              className={
+                error
+                  ? "p-2 w-full rounded-lg border border-red-500 placeholder-red-500 mt-1"
+                  : "p-2 w-full rounded-lg border mt-1"
+              }
               type="email"
               placeholder="user01@google.com"
               onChange={(e) => setEmail(e.target.value)}
@@ -64,15 +68,28 @@ const Login = () => {
               />
             </svg>
             <input
-              className={error ? "p-2 w-full rounded-lg border border-red-500 placeholder-red-500 mt-1" : "p-2 w-full rounded-lg border mt-1"}
+              className={
+                error
+                  ? "p-2 w-full rounded-lg border border-red-500 placeholder-red-500 mt-1"
+                  : "p-2 w-full rounded-lg border mt-1"
+              }
               type="password"
               placeholder="********"
               onChange={(e) => setPassword(e.target.value)}
               value={password}
             />
           </div>
-          <button disabled={isLoading} className="mt-8 mb-4 primary-btn">Log in now</button>
-          {error && <div className="text-red-500 text-lg text-center">{error}</div>}
+          <button
+            disabled={isLoading}
+            className={`mt-8 mb-4 primary-btn ${
+              isLoading ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+          >
+            {isLoading ? "Please wait, logging in..." : "Log in now"}
+          </button>
+          {error && (
+            <div className="text-red-500 text-lg text-center">{error}</div>
+          )}
         </div>
       </form>
     </div>

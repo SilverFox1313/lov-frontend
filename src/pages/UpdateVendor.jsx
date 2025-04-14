@@ -10,6 +10,7 @@ const UpdateVendor = () => {
   const navigate = useNavigate();
   const [error, setError] = useState(null);
   const [emptyFields, setEmptyFields] = useState([]);
+  const [isLoading, setIsLoading] = useState(false); // 👈 Nuevo estado
   const { user } = useAuthContext();
 
   const [vendor, setVendor] = useState({
@@ -38,7 +39,7 @@ const UpdateVendor = () => {
       }
     };
     fetchVendor();
-  }, [id]);
+  }, [id, user]);
 
   const handleChange = (e) => {
     setVendor({ ...vendor, [e.target.name]: e.target.value });
@@ -46,12 +47,13 @@ const UpdateVendor = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(vendor.name)
 
     if (!user) {
       setError("You must be logged in");
       return;
     }
+
+    setIsLoading(true); // 👈 Activamos el loading
 
     const response = await fetch(`https://lov-backend.onrender.com/api/vendors/${id}`, {
       method: "PATCH",
@@ -66,11 +68,14 @@ const UpdateVendor = () => {
 
     if (!response.ok) {
       setError(json.error);
-      setEmptyFields(json.emptyFields);
+      setEmptyFields(json.emptyFields || []);
     }
+
     if (response.ok) {
       navigate("/");
     }
+
+    setIsLoading(false); // 👈 Desactivamos el loading
   };
 
   return (
@@ -102,7 +107,7 @@ const UpdateVendor = () => {
               name="charge"
               value={vendor.charge}
               onChange={handleChange}
-              className="border-2  py-1 w-auto text-xs"
+              className="border-2 py-1 w-auto text-xs"
             >
               {charge_type.map((charge) => (
                 <option key={charge.id} value={charge.value}>
@@ -149,7 +154,13 @@ const UpdateVendor = () => {
             <Link to="/" className="secondary-btn">
               Cancel
             </Link>
-            <button className="primary-btn">Update now</button>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className={`primary-btn ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              {isLoading ? "Updating..." : "Update now"}
+            </button>
           </div>
           {error && <div className="text-red-500 text-center">{error}</div>}
         </form>

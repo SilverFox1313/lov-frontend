@@ -3,7 +3,7 @@ import Navbar from "../components/Navbar";
 import { Link } from "react-router-dom";
 import { charge_type, document_type, confirmation_number } from "../constants";
 import { useNavigate } from "react-router-dom";
-import { useAuthContext } from "../hooks/useAuthContext"
+import { useAuthContext } from "../hooks/useAuthContext";
 
 const AddVendor = () => {
   const [name, setName] = useState('');
@@ -11,30 +11,33 @@ const AddVendor = () => {
   const [charge, setCharge] = useState('No assigned');
   const [document, setDocument] = useState('No assigned');
   const [confirmation, setConfirmation] = useState('No assigned');
-  const [error, setError] = useState(null)
-  const [emptyFields, setEmptyFields] = useState([])
+  const [error, setError] = useState(null);
+  const [emptyFields, setEmptyFields] = useState([]);
+  const [isLoading, setIsLoading] = useState(false); // 👈 Nuevo estado
   const navigate = useNavigate();
-  const {user} = useAuthContext()
+  const { user } = useAuthContext();
 
   const handleCharge = (e) => {
-    setCharge(e.target.value)
-  }
+    setCharge(e.target.value);
+  };
 
   const handleDocument = (e) => {
-    setDocument(e.target.value)
-  }
+    setDocument(e.target.value);
+  };
 
   const handleConfirmation = (e) => {
-    setConfirmation(e.target.value)
-  }
+    setConfirmation(e.target.value);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if(!user) {
-      setError('You must be logged in')
-      return
+    if (!user) {
+      setError('You must be logged in');
+      return;
     }
+
+    setIsLoading(true); // 👈 Activamos el loading
 
     try {
       const response = await fetch("https://lov-backend.onrender.com/api/vendors/", {
@@ -48,17 +51,21 @@ const AddVendor = () => {
 
       const json = await response.json();
 
-      if(!response.ok) {
-        setError(json.error)
-        setEmptyFields(json.emptyFields)
+      if (!response.ok) {
+        setError(json.error);
+        setEmptyFields(json.emptyFields || []);
       }
-      if(response.ok) {
+
+      if (response.ok) {
         navigate("/");
       }
     } catch (error) {
       console.error("Error al crear la colección:", error);
+      setError("Something went wrong");
+    } finally {
+      setIsLoading(false); // 👈 Desactivamos el loading
     }
-  }
+  };
 
   return (
     <>
@@ -74,7 +81,7 @@ const AddVendor = () => {
             onChange={(e) => setName(e.target.value)}
           />
           <div className="flex flex-wrap gap-3 items-center">
-            <select value={charge} onChange={handleCharge} className="border-2  py-1 w-auto text-xs">
+            <select value={charge} onChange={handleCharge} className="border-2 py-1 w-auto text-xs">
               {charge_type.map((charge) => (
                 <option key={charge.id} value={charge.value}>
                   {charge.name}
@@ -105,13 +112,14 @@ const AddVendor = () => {
             onChange={(e) => setInfo(e.target.value)}
           ></textarea>
           <div className="flex justify-end gap-4 mt-10 text-xs">
-            <Link
-              to="/"
-              className="secondary-btn"
+            <Link to="/" className="secondary-btn">Cancel</Link>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className={`primary-btn ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-              Cancel
-            </Link>
-            <button className="primary-btn">Create now</button>
+              {isLoading ? 'Creating...' : 'Create now'}
+            </button>
           </div>
           {error && <div className="text-red-500 text-center">{error}</div>}
         </form>
